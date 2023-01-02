@@ -1,0 +1,50 @@
+name: main
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ['*']
+
+jobs:
+  base_branch_commit_sha:
+    runs-on: [self-hosted]
+    outputs: 
+      sha_short: ${{ steps.base_commit_sha.outputs.sha_short }}
+    steps:
+      - uses: actions/checkout@v3
+        with: 
+          ref: ${{ github.base_ref }}
+
+      - id: base_commit_sha
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+  cache:
+    runs-on: [self-hosted]
+    needs: [base_branch_commit_sha]
+    outputs:
+      shard: ${{ steps.shard.outputs.shard }}
+    steps:
+      - uses: actions/cache@v3
+        id: cache_coverage
+        with:
+          path: coverage
+          key: ${{ github.base_ref }}_${{needs.base_branch_commit_sha.outputs.sha_short}}_coverage
+      
+      - if: steps.cache_coverage.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p coverage
+          cd coverage
+          echo "hello" > foo.txt
+      
+      - name: decide-shard
+        id: shard
+        run: |
+          echo "::set-output name=shard::hello"
+#          echo ${{ toJson(steps) }}
+          
+    
+  stuff:
+    runs-on: [self-hosted]
+    needs: [base_branch_commit_sha, cache]
+    steps:
+      - run: echo ${{ needs.cache.outputs.shard }}
