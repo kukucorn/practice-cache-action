@@ -7,7 +7,7 @@ on:
 
 jobs:
   base_branch_commit_sha:
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-latest]
     outputs: 
       sha_short: ${{ steps.base_commit_sha.outputs.sha_short }}
     steps:
@@ -19,7 +19,7 @@ jobs:
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
   cache:
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-latest]
     needs: [base_branch_commit_sha]
     outputs:
       shard: ${{ steps.shard.outputs.shard }}
@@ -44,7 +44,7 @@ jobs:
           
     
   stuff:
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-latest]
     needs: [base_branch_commit_sha, cache]
     steps:
       - run: echo ${{ needs.cache.outputs.shard }}
